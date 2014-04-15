@@ -1,4 +1,4 @@
-ifneq ($(HAVE_FSL_IMX_GPU3D),true)
+ifneq ($(BOARD_HAVE_VPU),true)
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
