@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2015 Freescale Semiconductor, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,6 +167,13 @@ public class IndicatorControlWheel extends IndicatorControl implements
         if (isZoomSupported) {
             mZoomControl = (ZoomControlWheel) findViewById(R.id.zoom_control);
             mZoomControl.setVisibility(View.VISIBLE);
+        } else {
+            //ZoomControlWheel is default added in res/layout-sw600dp/camera_control.xml,
+            //If zoom not supported, should remove this view, or the radians of other view
+            //will be caculated error, thus control wheel show abnormal.
+            ZoomControlWheel ZCWheel = (ZoomControlWheel) findViewById(R.id.zoom_control);
+            if(ZCWheel != null)
+                removeView(ZCWheel);
         }
 
         // Add CameraPicker.
