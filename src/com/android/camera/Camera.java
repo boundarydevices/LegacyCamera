@@ -27,6 +27,10 @@ import com.android.camera.ui.RotateTextToast;
 import com.android.camera.ui.SharePopup;
 import com.android.camera.ui.ZoomControl;
 
+import android.content.pm.PackageManager;
+import android.widget.Toast;
+import android.Manifest;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ContentProviderClient;
@@ -179,6 +183,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private ImageView mFocusIndicator;
     // A view group that contains all the small indicators.
     private Rotatable mOnScreenIndicators;
+
+    private int mNumPermissionsToRequest = 0;
+    private boolean mShouldRequestLocationPermission = false;
+    private boolean mShouldRequestSMSPermission = false;
+    private static final int PERMISSION_REQUEST_CODE = 0;
 
     // We use a thread in ImageSaver to do the work of saving images and
     // generating thumbnails. This reduces the shot-to-shot time.
@@ -1130,6 +1139,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        checkPermission();
         getPreferredCameraId();
         String[] defaultFocusModes = getResources().getStringArray(
                 R.array.pref_camera_focusmode_default_array);
@@ -2336,4 +2346,49 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mAeLockSupported = mInitialParams.isAutoExposureLockSupported();
         mAwbLockSupported = mInitialParams.isAutoWhiteBalanceLockSupported();
     }
+
+    private void checkPermission(){
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+                mNumPermissionsToRequest++;
+                mShouldRequestLocationPermission = true;
+        }
+
+        if (checkSelfPermission(Manifest.permission.READ_SMS)
+                        != PackageManager.PERMISSION_GRANTED) {
+                mNumPermissionsToRequest++;
+                mShouldRequestSMSPermission  = true;
+        }
+
+        String[] permissionToRequest = new String[mNumPermissionsToRequest];
+        int permissionRequestIndex = 0;
+        if (mShouldRequestLocationPermission) {
+                permissionToRequest[permissionRequestIndex] = Manifest.permission.ACCESS_FINE_LOCATION;
+                permissionRequestIndex++;
+        }
+        if (mShouldRequestSMSPermission) {
+                permissionToRequest[permissionRequestIndex] = Manifest.permission.READ_SMS;
+                permissionRequestIndex++;
+        }
+        if (permissionToRequest.length > 0)
+                requestPermissions(permissionToRequest, PERMISSION_REQUEST_CODE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0
+                                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        Log.v(TAG, "Grant permission successfully");
+                } else {
+                        Log.v(TAG, "Grant permission unsuccessfully");
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
 }
