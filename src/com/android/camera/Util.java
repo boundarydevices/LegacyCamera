@@ -394,16 +394,6 @@ public class Util {
             targetHeight = display.getHeight();
         }
 
-        // Try to find an size match aspect ratio and size
-        for (Size size : sizes) {
-            double ratio = (double) size.width / size.height;
-            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
-            if (Math.abs(size.height - targetHeight) < minDiff) {
-                optimalSize = size;
-                minDiff = Math.abs(size.height - targetHeight);
-            }
-        }
-
         // Cannot find the one match the aspect ratio. This should not happen.
         // Ignore the requirement.
         if (optimalSize == null) {
